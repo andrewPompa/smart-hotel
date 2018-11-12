@@ -6,6 +6,7 @@ import lombok.Setter;
 
 import javax.persistence.*;
 import java.sql.Date;
+import java.util.List;
 
 @Getter
 @Setter
@@ -17,21 +18,24 @@ public class Reservation {
     @Column(nullable = false, unique = true)
     private long reservationCode;
 
-    @Column(nullable = false)
-    private Client client;
+    @ManyToMany
+    @JoinColumn(name = "client", nullable = false)
+    private List<Client> client;
 
-    @ManyToMany(mappedBy = "room", fetch = FetchType.EAGER)
-    private Room room;
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinColumn(name = "room", nullable = false)
+    private List<Room> room;
 
     @Column(nullable = false)
     private double roomPrice;
 
     @Column(nullable = false)
-    private Date from;
+    private Date fromDay;
 
     @Column(nullable = false)
-    private Date to;
+    private Date toDay;
 
-    @ManyToMany(mappedBy = "receptionist", fetch = FetchType.EAGER)
-    private Receptionist receptionist;
+    @ManyToMany
+    @JoinColumn(name = "receptionist")
+    private List<Receptionist> receptionist;
 }
