@@ -6,22 +6,26 @@ import lombok.Setter;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import java.util.Date;
 
+@NoArgsConstructor
 @Getter
 @Setter
 @Entity
-@NoArgsConstructor
-public class ChangedRoomPricePeriod {
+public class SeasonPrice {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private long id;
 
-    private Date from;
+    private int fromDay;
 
-    private Date to;
+    private int fromMonth;
+
+    private int toDay;
+
+    private int toMonth;
 
     private double priceFactor;
 }
