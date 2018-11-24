@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Room Search</title>
+    <link rel="stylesheet" type="text/css" href="/webjars/bootstrap/3.3.7/css/bootstrap.min.css"/>
+    <script type="text/javascript" src="/webjars/jquery/2.2.4/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/main.js"></script>
+</head>
+<body>
+<div class="container">
+    <form id="searchForm">
+        <div class="form-row">
+            <div class="form-group col-md-2">
+                <label for="inputFromDate">Od</label>
+                <input type="date" class="form-control" id="inputFromDate">
+            </div>
+            <div class="form-group col-md-2">
+                <label for="inputToDate">Do</label>
+                <input type="date" class="form-control" id="inputToDate">
+            </div>
+            <div class="form-group col-md-2">
+                <label for="inputStandard">Standard</label>
+                <select id="inputStandard" class="form-control">
+                    <option selected>Wybierz standard</option>
+                    <option>Podstawowy</option>
+                    <option>Premium</option>
+                </select>
+            </div>
+            <div class="form-group col-md-4">
+                <p id="labelNumOfPeoples">Ilość osób</p>
+                <input type="range" class="form-control-range" id="inputNumOfPeoples" min="1" max="10" value="2">
+            </div>
+            <div class="form-group col-md-2">
+                <label for="submitButton"></label>
+                <button id="submitButton" type="submit" class="form-control btn btn-primary ">Wyszukaj</button>
+            </div>
+        </div>
+    </form>
+    <div class="row">
+        <div id="feedback" class="col-md-12"></div>
+    </div>
+    <table class="table table-dark">
+        <thead>
+        <tr>
+            <th scope="col">#</th>
+            <th scope="col">First</th>
+            <th scope="col">Last</th>
+            <th scope="col">Handle</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <th scope="row">1</th>
+            <td>Mark</td>
+            <td>Otto</td>
+            <td>@mdo</td>
+        </tr>
+        <tr>
+            <th scope="row">2</th>
+            <td>hehhe</td>
+            <td>Thornton</td>
+            <td>@fat</td>
+        </tr>
+        <tr>
+            <th scope="row">3</th>
+            <td>Larry</td>
+            <td>the Bird</td>
+            <td>@twitter</td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+</body>
+</html>
