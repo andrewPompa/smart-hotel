@@ -2,6 +2,7 @@ package com.dynamics.andrzej.smart.hotel.configurations;
 
 import com.dynamics.andrzej.smart.hotel.entities.Receptionist;
 import com.dynamics.andrzej.smart.hotel.respositories.ReceptionistRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -15,6 +16,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Service
+@Slf4j
 public class AdminUserDetailsService implements UserDetailsService {
     private final ReceptionistRepository receptionistRepository;
 
@@ -34,7 +36,7 @@ public class AdminUserDetailsService implements UserDetailsService {
         return new UserDetails() {
             @Override
             public Collection<? extends GrantedAuthority> getAuthorities() {
-                return Stream.of(new SimpleGrantedAuthority("ADMIN")).collect(Collectors.toList());
+                return Stream.of(new SimpleGrantedAuthority("ROLE_ADMIN")).collect(Collectors.toList());
             }
 
             @Override
