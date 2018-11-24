@@ -40,6 +40,17 @@ public class WebSecurityConfigurer {
 
     @Order(1)
     @EnableWebSecurity
+    public class ApiSecurity extends WebSecurityConfigurerAdapter {
+        @Override
+        protected void configure(HttpSecurity http) throws Exception {
+            http.antMatcher("/api/**")
+                    .authorizeRequests().anyRequest().authenticated();
+        }
+
+    }
+
+    @Order(2)
+    @EnableWebSecurity
     public class AdminSecurity extends WebSecurityConfigurerAdapter {
         private final AuthenticationProvider authenticationProvider;
 
@@ -63,7 +74,7 @@ public class WebSecurityConfigurer {
 
     }
 
-    @Order(2)
+    @Order(3)
     @EnableWebSecurity
     public class ClientSecurity extends WebSecurityConfigurerAdapter {
         @Override
@@ -76,7 +87,7 @@ public class WebSecurityConfigurer {
         }
     }
 
-    @Order(3)
+    @Order(4)
     @EnableWebSecurity
     public class PermitAllSecurity extends WebSecurityConfigurerAdapter {
         @Override
