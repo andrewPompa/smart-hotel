@@ -5,6 +5,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.util.List;
 
 @Entity
 @Getter
@@ -25,4 +26,8 @@ public class Room {
     @Enumerated(EnumType.ORDINAL)
     @Column(nullable = false)
     private RoomType type;
+
+    @ManyToMany
+    @JoinColumn(name = "reservation")
+    private List<Reservation> reservations;
 }
