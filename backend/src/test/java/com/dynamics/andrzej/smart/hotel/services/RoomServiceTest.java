@@ -9,13 +9,16 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class RoomServiceTest {
-    public RoomService roomService;
-    public RoomRepository roomRepository;
+    private RoomService roomService;
+    private RoomRepository roomRepository;
 
     @BeforeTest
     public void setUp() {
@@ -31,6 +34,6 @@ public class RoomServiceTest {
 
         calendar.add(Calendar.DAY_OF_MONTH, 5);
         Date to = calendar.getTime();
-        roomService.searchRooms(from, to, RoomType.STANDARD, 10);
+        roomService.searchRooms(from, to, 1, RoomType.STANDARD, 10);
     }
 }

@@ -13,7 +13,7 @@ import java.util.Optional;
 public interface RoomRepository extends JpaRepository<Room, Long> {
     Optional<Room> findByName(String name);
 
-    @Query("select r from Room r left join fetch r.reservations res where res is null or res.toDay < ?2 OR res.fromDay > ?1")
+    @Query("select r from Room r left join fetch r.reservations res where res is null or res.toDay < ?2 OR res.fromDay > ?1 ORDER BY r.size desc ")
     List<Room> findWithoutReservationBetween(Date from, Date to);
 
     @Query("select r from Room r left join fetch r.reservations")

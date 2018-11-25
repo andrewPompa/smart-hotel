@@ -9,10 +9,9 @@ import com.dynamics.andrzej.smart.hotel.respositories.RoomRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Component
 @Slf4j
@@ -41,10 +40,42 @@ public class RoomService {
         roomRepository.deleteById(id);
     }
 
-    public List<RoomSearchResult> searchRooms(Date from, Date to, int numOfRooms, RoomType prefferedType, int numOfPeoples) {
-        List<Room> roomsWithoutReservation = roomRepository.findWithoutReservationBetween(from, to);
+    public List<RoomSearchResult> searchRooms(Date from, Date to, int numOfRooms, RoomType preferredType, int numOfPeoples) {
+        List<Room> rooms = roomRepository.findWithoutReservationBetween(from, to);
+        List<RoomSearchResult> allSolutions = new ArrayList<>();
+        for (int i = 0; i < rooms.size(); i++) {
+            final Room room = rooms.get(i);
+            List<Room> parentRoomChain = Stream.of(room).collect(Collectors.toList());
+            findCombinationOfFoundRooms(rooms.subList(i + 1, rooms.size()), numOfPeoples, parentRoomChain, allSolutions);
+        }
+        log.info("Rooms: {}", rooms.size());
+        return allSolutions;
+    }
+    private void findCombinationOfFoundRooms(List<Room> rooms, int minimumSize, List<Room> roomChain, List<RoomSearchResult> allSolutions) {
+        if (rooms.isEmpty()) {
+            return;
+        }
+        final Room edge = rooms.get(0);
+        final List<Room> extendedRoomChain = new ArrayList<>(roomChain);
+        extendedRoomChain.add(edge);
 
-        log.info("Rooms: {}", roomsWithoutReservation.size());
-        return Collections.emptyList();
+        Integer sumSize = extendedRoomChain.stream().map(Room::getSize).reduce((i, j) -> i + j).get();
+        if (sumSize >= minimumSize) {
+            allSolutions.add(new RoomSearchResult(extendedRoomChain));
+        } else {
+            roomChain = extendedRoomChain;
+        }
+        for (int i = 1; i < rooms.size(); i++) {
+            final Room room = rooms.get(i);
+            List<Room> newRoomChain = new ArrayList<>(roomChain);
+            newRoomChain.add(room);
+            sumSize = newRoomChain.stream().map(Room::getSize).reduce((k, j) -> k + j).get();
+            if (sumSize < minimumSize) {
+                findCombinationOfFoundRooms(rooms.subList(i + 1, rooms.size()), minimumSize, newRoomChain, allSolutions);
+            } else {
+                allSolutions.add(new RoomSearchResult(newRoomChain));
+            }
+        }
+
     }
 }
