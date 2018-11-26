@@ -1,11 +1,11 @@
 package com.dynamics.andrzej.smart.hotel.services;
 
 import com.dynamics.andrzej.smart.hotel.RoomSearchResult;
-import com.dynamics.andrzej.smart.hotel.entities.Reservation;
-import com.dynamics.andrzej.smart.hotel.entities.Room;
-import com.dynamics.andrzej.smart.hotel.entities.RoomType;
+import com.dynamics.andrzej.smart.hotel.entities.*;
+import com.dynamics.andrzej.smart.hotel.respositories.ChangedPricePeriodRepository;
 import com.dynamics.andrzej.smart.hotel.respositories.ReservationRepository;
 import com.dynamics.andrzej.smart.hotel.respositories.RoomRepository;
+import com.dynamics.andrzej.smart.hotel.respositories.SeasonPriceRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -18,10 +18,14 @@ import java.util.stream.Stream;
 public class RoomService {
     private final RoomRepository roomRepository;
     private final ReservationRepository reservationRepository;
+    private final ChangedPricePeriodRepository changedPricePeriodRepository;
+    private final SeasonPriceRepository seasonPriceRepository;
 
-    public RoomService(RoomRepository roomRepository, ReservationRepository reservationRepository) {
+    public RoomService(RoomRepository roomRepository, ReservationRepository reservationRepository, ChangedPricePeriodRepository changedPricePeriodRepository, SeasonPriceRepository seasonPriceRepository) {
         this.roomRepository = roomRepository;
         this.reservationRepository = reservationRepository;
+        this.changedPricePeriodRepository = changedPricePeriodRepository;
+        this.seasonPriceRepository = seasonPriceRepository;
     }
 
     public Room add(Room room) {
@@ -40,21 +44,52 @@ public class RoomService {
         roomRepository.deleteById(id);
     }
 
-    public List<RoomSearchResult> searchRooms(Date from, Date to, int numOfRooms, RoomType preferredType, int numOfPeoples) {
+    public List<RoomSearchResult> searchRooms(Date from, Date to, RoomType preferredType, int numOfPeoples) {
         List<Room> rooms = roomRepository.findWithoutReservationBetween(from, to);
+
         List<RoomSearchResult> allSolutions = new ArrayList<>();
         for (int i = 0; i < rooms.size(); i++) {
             final Room room = rooms.get(i);
             List<Room> parentRoomChain = Stream.of(room).collect(Collectors.toList());
-            findCombinationOfFoundRooms(rooms.subList(i + 1, rooms.size()), numOfPeoples, parentRoomChain, allSolutions);
+            findCombinationOfRooms(rooms.subList(i + 1, rooms.size()), numOfPeoples, parentRoomChain, allSolutions);
         }
-        log.info("Rooms: {}", rooms.size());
+
+        final Calendar fromCalendar = Calendar.getInstance();
+        fromCalendar.setTime(from);
+        final Calendar toCalendar = Calendar.getInstance();
+        toCalendar.setTime(to);
+        final List<SeasonPrice> seasonPrices = seasonPriceRepository.findAllInDate(
+                fromCalendar.get(Calendar.DAY_OF_MONTH),
+                fromCalendar.get(Calendar.MONTH),
+                toCalendar.get(Calendar.DAY_OF_MONTH),
+                toCalendar.get(Calendar.MONTH)
+        );
+        final List<ChangedPricePeriod> changedPricePeriods = changedPricePeriodRepository.findAllByFromDayBeforeAndToDayAfter(from, to);
+
+        allSolutions.forEach(solution -> {
+            final ReservationPriceCalculator reservationPriceCalculator = new ReservationPriceCalculator(solution, seasonPrices, changedPricePeriods);
+            double price = reservationPriceCalculator.calculate();
+            solution.setRoomsPrice(price);
+        });
+
+        allSolutions = allSolutions.stream().sorted((result1, result2) -> {
+            final int fitness1 = calculateFitness(result1, preferredType, numOfPeoples);
+            final int fitness2 = calculateFitness(result2, preferredType, numOfPeoples);
+            return fitness1 - fitness2;
+        }).collect(Collectors.toList());
+        log.info("allSolutions: {}", allSolutions.size());
         return allSolutions;
     }
-    private void findCombinationOfFoundRooms(List<Room> rooms, int minimumSize, List<Room> roomChain, List<RoomSearchResult> allSolutions) {
+    private void findCombinationOfRooms(List<Room> rooms, int minimumSize, List<Room> roomChain, List<RoomSearchResult> allSolutions) {
         if (rooms.isEmpty()) {
             return;
         }
+        Integer roomChainSize = roomChain.stream().map(Room::getSize).reduce((i, j) -> i + j).get();
+        if (roomChainSize >= minimumSize) {
+            allSolutions.add(new RoomSearchResult(roomChain));
+            return;
+        }
+
         final Room edge = rooms.get(0);
         final List<Room> extendedRoomChain = new ArrayList<>(roomChain);
         extendedRoomChain.add(edge);
@@ -71,11 +106,16 @@ public class RoomService {
             newRoomChain.add(room);
             sumSize = newRoomChain.stream().map(Room::getSize).reduce((k, j) -> k + j).get();
             if (sumSize < minimumSize) {
-                findCombinationOfFoundRooms(rooms.subList(i + 1, rooms.size()), minimumSize, newRoomChain, allSolutions);
+                findCombinationOfRooms(rooms.subList(i + 1, rooms.size()), minimumSize, newRoomChain, allSolutions);
             } else {
                 allSolutions.add(new RoomSearchResult(newRoomChain));
             }
         }
-
+    }
+    private int calculateFitness(RoomSearchResult result, RoomType preferredType, int numOfPeoples) {
+        int sizeFactor = result.getSize() - numOfPeoples == 0 ? 1000 : 50 - (result.getSize() - numOfPeoples);
+//        int numOfRoomsFactor = result.getNumOfRooms() - preferredNumOfRooms == 0 ? 100 : 20 - Math.abs(result.getNumOfRooms() - preferredNumOfRooms);
+        int preferredTypeFactor = (int) (20 *  result.getRooms().stream().filter(room -> room.getType() == preferredType).count());
+        return (int) (sizeFactor + 100 * result.getRoomsPrice() + preferredTypeFactor);
     }
 }

@@ -23,8 +23,18 @@ $(document).ready(function () {
 
 function onSearchSuccess(data) {
     var json = "<h4>Ajax Response</h4><pre>" + JSON.stringify(data, null, 4) + "</pre>";
-    $('#feedback').html(json);
 
+    const rows = data.map((rowData, index) => {
+        let list = "";
+        rowData.rooms.forEach(room => {
+            list += `pokój ${room.name}, il osób: ${room.size}, ${room.type}<br/>`;
+        });
+        return `<tr><th scope="row">${(index + 1)}</th><td>${list}</td><td>${rowData.roomsPrice}</td><td><button class="btn btn-primary">Rezerwuj</button></td></tr>`;
+    });
+    $('#test > tbody:last-child').html("");
+    rows.forEach(row => {
+        $('#test > tbody:last-child').append(row);
+    });
 }
 
 function onSearchFault(e) {
@@ -57,12 +67,11 @@ function sendAjax(type, url, data, successHandler, errorHandler) {
     if (errorHandler != null) {
         ajax.error = errorHandler;
     }
-    console.log(ajax);
     $.ajax(ajax);
 }
 
-Date.prototype.toDateInputValue = (function() {
+Date.prototype.toDateInputValue = (function () {
     var local = new Date(this);
     local.setMinutes(this.getMinutes() - this.getTimezoneOffset());
-    return local.toJSON().slice(0,10);
+    return local.toJSON().slice(0, 10);
 });

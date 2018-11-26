@@ -22,4 +22,16 @@ public class RoomSearchResult {
     public void addRoom(Room room) {
         rooms.add(room);
     }
+
+    public int getNumOfRooms() {
+        return rooms.size();
+    }
+
+    public List<Room> getRooms() {
+        return new ArrayList<>(rooms);
+    }
+
+    public int getSize() {
+        return rooms.stream().map(Room::getSize).reduce((o1, o2) -> o1 + o2).get();
+    }
 }

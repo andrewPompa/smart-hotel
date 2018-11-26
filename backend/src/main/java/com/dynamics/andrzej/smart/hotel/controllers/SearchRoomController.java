@@ -1,5 +1,6 @@
 package com.dynamics.andrzej.smart.hotel.controllers;
 
+import com.dynamics.andrzej.smart.hotel.RoomSearchResult;
 import com.dynamics.andrzej.smart.hotel.entities.RoomType;
 import com.dynamics.andrzej.smart.hotel.services.RoomService;
 import lombok.extern.slf4j.Slf4j;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.List;
 
 
 @RestController
@@ -24,19 +26,16 @@ public class SearchRoomController {
     }
 
     @GetMapping("/search")
-    public void searchRooms(
+    public List<RoomSearchResult> searchRooms(
             @RequestParam("from") String from,
             @RequestParam("to") String to,
             @RequestParam("standard") String standard,
             @RequestParam("numOfPeoples") Integer numOfPeoples
     ) throws ParseException {
-        log.info("got it!");
-
-        roomService.searchRooms(
+        return roomService.searchRooms(
                 dateFormat.parse(from),
                 dateFormat.parse(to),
-                10,
-                RoomType.STANDARD,
+                "PREMIUM".equals(standard.toUpperCase()) ? RoomType.PREMIUM : RoomType.STANDARD,
                 numOfPeoples
         );
     }

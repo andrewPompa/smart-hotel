@@ -34,6 +34,6 @@ public class RoomServiceTest {
 
         calendar.add(Calendar.DAY_OF_MONTH, 5);
         Date to = calendar.getTime();
-        roomService.searchRooms(from, to, 1, RoomType.STANDARD, 10);
+        roomService.searchRooms(from, to, RoomType.STANDARD, 10);
     }
 }
