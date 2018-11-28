@@ -4,11 +4,14 @@ import com.dynamics.andrzej.smart.hotel.entities.Room;
 import lombok.Data;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @Data
 public class RoomSearchResult {
     private List<Room> rooms;
+    private Date from;
+    private Date to;
     private double roomsPrice;
 
     public RoomSearchResult(List<Room> rooms) {

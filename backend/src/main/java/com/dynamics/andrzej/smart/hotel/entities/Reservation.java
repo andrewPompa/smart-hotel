@@ -15,16 +15,16 @@ import java.util.List;
 public class Reservation {
 
     @Id
-    @Column(nullable = false, unique = true)
+    @GeneratedValue
     private long reservationCode;
 
-    @ManyToMany
+    @ManyToOne
     @JoinColumn(name = "client", nullable = false)
-    private List<Client> client;
+    private Client client;
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinColumn(name = "room", nullable = false)
-    private List<Room> room;
+    private List<Room> rooms;
 
     @Column(nullable = false)
     private double roomPrice;
@@ -35,7 +35,7 @@ public class Reservation {
     @Column(nullable = false)
     private Date toDay;
 
-    @ManyToMany
+    @ManyToOne
     @JoinColumn(name = "receptionist")
-    private List<Receptionist> receptionist;
+    private Receptionist receptionist;
 }

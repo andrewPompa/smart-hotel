@@ -2,11 +2,11 @@ package com.dynamics.andrzej.smart.hotel.services;
 
 import com.dynamics.andrzej.smart.hotel.RoomSearchResult;
 import com.dynamics.andrzej.smart.hotel.entities.*;
-import com.dynamics.andrzej.smart.hotel.respositories.ChangedPricePeriodRepository;
+import com.dynamics.andrzej.smart.hotel.models.ReservationRequest;
 import com.dynamics.andrzej.smart.hotel.respositories.ReservationRepository;
 import com.dynamics.andrzej.smart.hotel.respositories.RoomRepository;
-import com.dynamics.andrzej.smart.hotel.respositories.SeasonPriceRepository;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -18,14 +18,17 @@ import java.util.stream.Stream;
 public class RoomService {
     private final RoomRepository roomRepository;
     private final ReservationRepository reservationRepository;
-    private final ChangedPricePeriodRepository changedPricePeriodRepository;
-    private final SeasonPriceRepository seasonPriceRepository;
+    private final ClientService clientService;
+    private final ReservationPriceCalculator reservationPriceCalculator;
+    private final NewClientPinGenerator pinGenerator;
 
-    public RoomService(RoomRepository roomRepository, ReservationRepository reservationRepository, ChangedPricePeriodRepository changedPricePeriodRepository, SeasonPriceRepository seasonPriceRepository) {
+    @Autowired
+    public RoomService(RoomRepository roomRepository, ReservationRepository reservationRepository, ClientService clientService, ReservationPriceCalculator reservationPriceCalculator, NewClientPinGenerator pinGenerator) {
         this.roomRepository = roomRepository;
         this.reservationRepository = reservationRepository;
-        this.changedPricePeriodRepository = changedPricePeriodRepository;
-        this.seasonPriceRepository = seasonPriceRepository;
+        this.clientService = clientService;
+        this.reservationPriceCalculator = reservationPriceCalculator;
+        this.pinGenerator = pinGenerator;
     }
 
     public Room add(Room room) {
@@ -37,7 +40,7 @@ public class RoomService {
     }
 
     public void delete(Long id) {
-        final List<Reservation> byRoomId = reservationRepository.findByRoomId(id);
+        final List<Reservation> byRoomId = reservationRepository.findByRoomsId(id);
         if (!byRoomId.isEmpty()) {
             throw new IllegalArgumentException("Room is reserved, cannot by removed");
         }
@@ -54,21 +57,10 @@ public class RoomService {
             findCombinationOfRooms(rooms.subList(i + 1, rooms.size()), numOfPeoples, parentRoomChain, allSolutions);
         }
 
-        final Calendar fromCalendar = Calendar.getInstance();
-        fromCalendar.setTime(from);
-        final Calendar toCalendar = Calendar.getInstance();
-        toCalendar.setTime(to);
-        final List<SeasonPrice> seasonPrices = seasonPriceRepository.findAllInDate(
-                fromCalendar.get(Calendar.DAY_OF_MONTH),
-                fromCalendar.get(Calendar.MONTH),
-                toCalendar.get(Calendar.DAY_OF_MONTH),
-                toCalendar.get(Calendar.MONTH)
-        );
-        final List<ChangedPricePeriod> changedPricePeriods = changedPricePeriodRepository.findAllByFromDayBeforeAndToDayAfter(from, to);
-
         allSolutions.forEach(solution -> {
-            final ReservationPriceCalculator reservationPriceCalculator = new ReservationPriceCalculator(solution, seasonPrices, changedPricePeriods);
-            double price = reservationPriceCalculator.calculate();
+            double price = reservationPriceCalculator.calculate(solution.getRooms(), from, to);
+            solution.setFrom(from);
+            solution.setTo(to);
             solution.setRoomsPrice(price);
         });
 
@@ -80,6 +72,30 @@ public class RoomService {
         log.info("allSolutions: {}", allSolutions.size());
         return allSolutions;
     }
+
+    public void reserve(ReservationRequest request) {
+        Optional<Client> clientOptional = clientService.getClientByEmail(request.getEmail());
+        Client client;
+        if (clientOptional.isPresent()) {
+            client = clientOptional.get();
+            if (!client.getFirstName().equalsIgnoreCase(request.getFirstName()) || !client.getLastName().equalsIgnoreCase(request.getLastName())) {
+                throw new IllegalArgumentException("invalid user: " + request.getEmail());
+            }
+        } else {
+            client = clientService.register(request.getEmail(), request.getFirstName(), request.getLastName(), pinGenerator.generate());
+        }
+        Reservation reservation = new Reservation();
+        reservation.setClient(client);
+        List<Room> rooms = roomRepository.findByIdIn(request.getRoomIds());
+        reservation.setRooms(rooms);
+        reservation.setFromDay(new java.sql.Date(request.getFrom().getTime()));
+        reservation.setToDay(new java.sql.Date(request.getTo().getTime()));
+        double price = reservationPriceCalculator.calculate(rooms, request.getFrom(), request.getTo());
+        reservation.setRoomPrice(price);
+        //todo: get authenticated user, if its receptionist then set to reservation
+        reservationRepository.save(reservation);
+    }
+
     private void findCombinationOfRooms(List<Room> rooms, int minimumSize, List<Room> roomChain, List<RoomSearchResult> allSolutions) {
         if (rooms.isEmpty()) {
             return;
@@ -112,6 +128,7 @@ public class RoomService {
             }
         }
     }
+
     private int calculateFitness(RoomSearchResult result, RoomType preferredType, int numOfPeoples) {
         int sizeFactor = result.getSize() - numOfPeoples == 0 ? 1000 : 50 - (result.getSize() - numOfPeoples);
 //        int numOfRoomsFactor = result.getNumOfRooms() - preferredNumOfRooms == 0 ? 100 : 20 - Math.abs(result.getNumOfRooms() - preferredNumOfRooms);

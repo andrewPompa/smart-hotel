@@ -18,4 +18,6 @@ public interface RoomRepository extends JpaRepository<Room, Long> {
 
     @Query("select r from Room r left join fetch r.reservations")
     List<Room> findAllEagerly();
+
+    List<Room> findByIdIn(List<Long> roomIds);
 }

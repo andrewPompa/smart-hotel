@@ -44,7 +44,8 @@ public class WebSecurityConfigurer {
         @Override
         protected void configure(HttpSecurity http) throws Exception {
             http.antMatcher("/api/**")
-                    .authorizeRequests().anyRequest().authenticated();
+                    .authorizeRequests().anyRequest().authenticated()
+                    .and().csrf().disable();
         }
 
     }

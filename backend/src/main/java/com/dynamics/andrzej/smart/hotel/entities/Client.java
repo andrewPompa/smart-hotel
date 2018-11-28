@@ -31,13 +31,13 @@ public class Client {
     @Column(nullable = false)
     private String lastName;
 
-    @Column(nullable = false)
+    @Column
     private String city;
 
-    @Column(nullable = false)
+    @Column
     private String street;
 
-    @Column(nullable = false)
+    @Column
     private String flatNumber;
 
     @Column(nullable = false)

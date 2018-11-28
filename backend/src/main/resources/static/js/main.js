@@ -1,3 +1,7 @@
+let roomIds = [];
+let reservationFrom;
+let reservationToId;
+
 $(document).ready(function () {
     let numOfPeoplesRange = $("#inputNumOfPeoples");
     $("#labelNumOfPeoples").html("Ilość osób: " + numOfPeoplesRange[0].value);
@@ -26,15 +30,20 @@ function onSearchSuccess(data) {
 
     const rows = data.map((rowData, index) => {
         let list = "";
+        let ids = [];
+        console.log(rowData.from);
+        console.log(rowData.to);
         rowData.rooms.forEach(room => {
             list += `pokój ${room.name}, il osób: ${room.size}, ${room.type}<br/>`;
+            ids.push(room.id);
         });
+        console.log(ids);
         return `<tr>
                     <th scope="row">${(index + 1)}</th>
                     <td>${list}</td>
                     <td>${rowData.roomsPrice}</td>
                     <td>
-                        <button class="btn btn-primary" data-toggle="modal" data-target="#myModal" onclick="onClickReserveRoomsButton('${list}', ${rowData.roomsPrice})">
+                        <button class="btn btn-primary" data-toggle="modal" data-target="#myModal" onclick="onClickReserveRoomsButton('${list}', ${rowData.roomsPrice}, '${ids}', '${rowData.from}', '${rowData.to}')">
                             Rezerwuj
                         </button>
                     </td>
@@ -46,11 +55,25 @@ function onSearchSuccess(data) {
     });
 }
 
-function onClickReserveRoomsButton(rooms, price) {
+function onClickReserveRoomsButton(rooms, price, ids, from, to) {
     console.log(rooms);
     console.log(price);
     $('#modalRooms').html(rooms);
     $('#modalPrice').html(price);
+    console.log(ids);
+    roomIds = ids.split(',');
+    reservationFromId = from;
+    reservationToId = to;
+
+}
+function onClickSendReservationButton() {
+    const email = $('#userEmail').val();
+    const firstName = $('#userFirstName').val();
+    const lastName = $('#userLastName').val();
+    const data = {email: email, firstName: firstName, lastName: lastName, roomIds: roomIds, from: reservationFromId, to: reservationToId};
+    console.log(roomIds);
+    console.log(data);
+    post('/api/room/reserve', JSON.stringify(data), () => {console.log('goood')}, () => {console.log('not ok')});
 }
 
 function onSearchFault(e) {
@@ -71,7 +94,7 @@ function sendAjax(type, url, data, successHandler, errorHandler) {
     ajax.type = type;
     ajax.url = url;
     ajax.dataType = "json";
-    if (type.toUpperCase() == "POST") {
+    if (type.toUpperCase() === "POST") {
         ajax.contentType = "application/json";
     }
     if (data != null) {
@@ -87,7 +110,7 @@ function sendAjax(type, url, data, successHandler, errorHandler) {
 }
 
 Date.prototype.toDateInputValue = (function () {
-    var local = new Date(this);
+    const local = new Date(this);
     local.setMinutes(this.getMinutes() - this.getTimezoneOffset());
     return local.toJSON().slice(0, 10);
 });
