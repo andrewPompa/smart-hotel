@@ -29,12 +29,28 @@ function onSearchSuccess(data) {
         rowData.rooms.forEach(room => {
             list += `pokój ${room.name}, il osób: ${room.size}, ${room.type}<br/>`;
         });
-        return `<tr><th scope="row">${(index + 1)}</th><td>${list}</td><td>${rowData.roomsPrice}</td><td><button class="btn btn-primary">Rezerwuj</button></td></tr>`;
+        return `<tr>
+                    <th scope="row">${(index + 1)}</th>
+                    <td>${list}</td>
+                    <td>${rowData.roomsPrice}</td>
+                    <td>
+                        <button class="btn btn-primary" data-toggle="modal" data-target="#myModal" onclick="onClickReserveRoomsButton('${list}', ${rowData.roomsPrice})">
+                            Rezerwuj
+                        </button>
+                    </td>
+                </tr>`;
     });
     $('#test > tbody:last-child').html("");
     rows.forEach(row => {
         $('#test > tbody:last-child').append(row);
     });
+}
+
+function onClickReserveRoomsButton(rooms, price) {
+    console.log(rooms);
+    console.log(price);
+    $('#modalRooms').html(rooms);
+    $('#modalPrice').html(price);
 }
 
 function onSearchFault(e) {
