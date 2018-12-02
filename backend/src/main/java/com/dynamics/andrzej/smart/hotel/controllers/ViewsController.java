@@ -26,4 +26,9 @@ public class ViewsController {
     public String adminSearch() {
         return "room_search";
     }
+
+    @RequestMapping("/admin/clients")
+    public String adminClients() {
+        return "admin_clients";
+    }
 }

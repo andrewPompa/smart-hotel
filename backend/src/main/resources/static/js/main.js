@@ -26,7 +26,6 @@ $(document).ready(function () {
 });
 
 function onSearchSuccess(data) {
-    var json = "<h4>Ajax Response</h4><pre>" + JSON.stringify(data, null, 4) + "</pre>";
 
     const rows = data.map((rowData, index) => {
         let list = "";
@@ -73,13 +72,24 @@ function onClickSendReservationButton() {
     const data = {email: email, firstName: firstName, lastName: lastName, roomIds: roomIds, from: reservationFromId, to: reservationToId};
     console.log(roomIds);
     console.log(data);
-    post('/api/room/reserve', JSON.stringify(data), () => {console.log('goood')}, () => {console.log('not ok')});
+    post('/api/room/reserve', JSON.stringify(data), onReservationSuccess, onSearchFault);
 }
 
 function onSearchFault(e) {
-    var json = "<h4>Ajax Response</h4><pre>" + e.responseText + "</pre>";
-    $('#feedback').html(json);
+    const json = "<h4>Ajax Response</h4><pre>" + e.responseText + "</pre>";
+    $('#feedback').html(`wystąpił błąd: ${json}`);
+    $('#closeModalButton').click();
 }
+
+const onReservationSuccess = (data) => {
+    console.log(data);
+    if (data.inNewClient) {
+        $('#feedback').html(`Pomyśnie zarezerwowano.<br />Nowy użytkownik ${data.code}`);
+    } else {
+        $('#feedback').html(`Pomyśnie zarezerwowano.<br />Użytkownik już istnieje`);
+    }
+    $('#closeModalButton').click();
+};
 
 function get(url, data, successHandler, errorHandler) {
     sendAjax("GET", url, data, successHandler, errorHandler)

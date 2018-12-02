@@ -3,6 +3,7 @@ package com.dynamics.andrzej.smart.hotel.services;
 import com.dynamics.andrzej.smart.hotel.RoomSearchResult;
 import com.dynamics.andrzej.smart.hotel.entities.*;
 import com.dynamics.andrzej.smart.hotel.models.ReservationRequest;
+import com.dynamics.andrzej.smart.hotel.models.ReservationResponse;
 import com.dynamics.andrzej.smart.hotel.respositories.ReservationRepository;
 import com.dynamics.andrzej.smart.hotel.respositories.RoomRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -73,16 +74,20 @@ public class RoomService {
         return allSolutions;
     }
 
-    public void reserve(ReservationRequest request) {
+    public ReservationResponse reserve(ReservationRequest request) {
         Optional<Client> clientOptional = clientService.getClientByEmail(request.getEmail());
         Client client;
+        ReservationResponse response;
         if (clientOptional.isPresent()) {
             client = clientOptional.get();
             if (!client.getFirstName().equalsIgnoreCase(request.getFirstName()) || !client.getLastName().equalsIgnoreCase(request.getLastName())) {
                 throw new IllegalArgumentException("invalid user: " + request.getEmail());
             }
+            response = new ReservationResponse(false, null);
         } else {
-            client = clientService.register(request.getEmail(), request.getFirstName(), request.getLastName(), pinGenerator.generate());
+            final String pin = pinGenerator.generate();
+            client = clientService.register(request.getEmail(), request.getFirstName(), request.getLastName(), pin);
+            response = new ReservationResponse(true, pin);
         }
         Reservation reservation = new Reservation();
         reservation.setClient(client);
@@ -94,6 +99,7 @@ public class RoomService {
         reservation.setRoomPrice(price);
         //todo: get authenticated user, if its receptionist then set to reservation
         reservationRepository.save(reservation);
+        return response;
     }
 
     private void findCombinationOfRooms(List<Room> rooms, int minimumSize, List<Room> roomChain, List<RoomSearchResult> allSolutions) {

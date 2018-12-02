@@ -2,6 +2,7 @@ package com.dynamics.andrzej.smart.hotel.controllers;
 
 import com.dynamics.andrzej.smart.hotel.entities.Reservation;
 import com.dynamics.andrzej.smart.hotel.models.ReservationRequest;
+import com.dynamics.andrzej.smart.hotel.models.ReservationResponse;
 import com.dynamics.andrzej.smart.hotel.services.RoomService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
@@ -17,8 +18,8 @@ public class RoomReservationController {
     }
 
     @PostMapping("/reserve")
-    public void reserveRooms(@RequestBody ReservationRequest request) {
+    public ReservationResponse reserveRooms(@RequestBody ReservationRequest request) {
         log.info("bang: {}", request);
-        roomService.reserve(request);
+        return roomService.reserve(request);
     }
 }
