@@ -4,6 +4,7 @@ import com.dynamics.andrzej.smart.hotel.entities.Receptionist;
 import com.dynamics.andrzej.smart.hotel.entities.Room;
 import com.dynamics.andrzej.smart.hotel.entities.RoomType;
 import com.dynamics.andrzej.smart.hotel.respositories.ReceptionistRepository;
+import com.dynamics.andrzej.smart.hotel.respositories.RoomRepository;
 import com.dynamics.andrzej.smart.hotel.services.RoomService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,12 +19,14 @@ import javax.annotation.PostConstruct;
 public class SmartHotel {
     private final ReceptionistRepository receptionistRepository;
     private final RoomService roomService;
+    private final RoomRepository roomRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    public SmartHotel(ReceptionistRepository receptionistRepository, RoomService roomService, PasswordEncoder passwordEncoder) {
+    public SmartHotel(ReceptionistRepository receptionistRepository, RoomService roomService, RoomRepository roomRepository, PasswordEncoder passwordEncoder) {
         this.receptionistRepository = receptionistRepository;
         this.roomService = roomService;
+        this.roomRepository = roomRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -34,8 +37,12 @@ public class SmartHotel {
 
     @PostConstruct
     public void addUsers() {
-        addReceptionists();
-        addRooms();
+        if (receptionistRepository.findAll().isEmpty()) {
+            addReceptionists();
+        }
+        if (roomRepository.findAll().isEmpty()) {
+            addRooms();
+        }
     }
 
     private void addReceptionists() {

@@ -99,6 +99,7 @@ public class RoomService {
         reservation.setRoomPrice(price);
         //todo: get authenticated user, if its receptionist then set to reservation
         reservationRepository.save(reservation);
+        clientService.addDebtToClient(client, reservation.getRoomPrice());
         return response;
     }
 
