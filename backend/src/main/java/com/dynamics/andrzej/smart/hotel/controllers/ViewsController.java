@@ -31,4 +31,14 @@ public class ViewsController {
     public String adminClients() {
         return "admin_clients";
     }
+
+    @RequestMapping("/admin/room")
+    public String adminRoom() {
+        return "admin_room";
+    }
+
+    @RequestMapping("/admin/reservation")
+    public String adminReservation() {
+        return "admin_reservation";
+    }
 }

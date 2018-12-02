@@ -7,6 +7,8 @@ import com.dynamics.andrzej.smart.hotel.services.RoomService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/room")
 @Slf4j
@@ -19,7 +21,6 @@ public class RoomReservationController {
 
     @PostMapping("/reserve")
     public ReservationResponse reserveRooms(@RequestBody ReservationRequest request) {
-        log.info("bang: {}", request);
         return roomService.reserve(request);
     }
 }

@@ -16,7 +16,7 @@ public class Reservation {
 
     @Id
     @GeneratedValue
-    private long reservationCode;
+    private long id;
 
     @ManyToOne
     @JoinColumn(name = "client", nullable = false)

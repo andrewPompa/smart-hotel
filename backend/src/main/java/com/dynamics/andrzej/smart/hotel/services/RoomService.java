@@ -4,6 +4,7 @@ import com.dynamics.andrzej.smart.hotel.RoomSearchResult;
 import com.dynamics.andrzej.smart.hotel.entities.*;
 import com.dynamics.andrzej.smart.hotel.models.ReservationRequest;
 import com.dynamics.andrzej.smart.hotel.models.ReservationResponse;
+import com.dynamics.andrzej.smart.hotel.models.RoomRequest;
 import com.dynamics.andrzej.smart.hotel.respositories.ReservationRepository;
 import com.dynamics.andrzej.smart.hotel.respositories.RoomRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -32,6 +33,14 @@ public class RoomService {
         this.pinGenerator = pinGenerator;
     }
 
+    public Room add(RoomRequest roomRequest) {
+        final Room room = new Room();
+        room.setName(roomRequest.getName());
+        room.setSize(roomRequest.getSize());
+        room.setType(RoomType.get(roomRequest.getType()));
+        return add(room);
+    }
+
     public Room add(Room room) {
         final Optional<Room> byName = roomRepository.findByName(room.getName());
         if (byName.isPresent()) {
@@ -46,6 +55,10 @@ public class RoomService {
             throw new IllegalArgumentException("Room is reserved, cannot by removed");
         }
         roomRepository.deleteById(id);
+    }
+
+    public List<Room> findAll() {
+        return roomRepository.findAll();
     }
 
     public List<RoomSearchResult> searchRooms(Date from, Date to, RoomType preferredType, int numOfPeoples) {
