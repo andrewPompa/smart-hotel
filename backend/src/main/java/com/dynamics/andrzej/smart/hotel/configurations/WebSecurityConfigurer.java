@@ -1,6 +1,7 @@
 package com.dynamics.andrzej.smart.hotel.configurations;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
@@ -16,13 +17,13 @@ import javax.sql.DataSource;
 
 @Configuration
 public class WebSecurityConfigurer {
-    private final DataSource dataSource;
     private final AdminUserDetailsService adminUserDetailsService;
+    private final ClientUserDetailsService clientUserDetailsService;
 
     @Autowired
-    public WebSecurityConfigurer(DataSource dataSource, AdminUserDetailsService adminUserDetailsService) {
-        this.dataSource = dataSource;
+    public WebSecurityConfigurer(AdminUserDetailsService adminUserDetailsService, ClientUserDetailsService clientUserDetailsService) {
         this.adminUserDetailsService = adminUserDetailsService;
+        this.clientUserDetailsService = clientUserDetailsService;
     }
 
     @Bean
@@ -30,10 +31,18 @@ public class WebSecurityConfigurer {
         return new BCryptPasswordEncoder();
     }
 
-    @Bean
+    @Bean("adminAuthProvider")
     public DaoAuthenticationProvider adminAuthProvider(PasswordEncoder encoder) {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
         authProvider.setUserDetailsService(adminUserDetailsService);
+        authProvider.setPasswordEncoder(encoder);
+        return authProvider;
+    }
+
+    @Bean("clientAuthProvider")
+    public DaoAuthenticationProvider clientAuthProvider(PasswordEncoder encoder) {
+        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
+        authProvider.setUserDetailsService(clientUserDetailsService);
         authProvider.setPasswordEncoder(encoder);
         return authProvider;
     }
@@ -54,21 +63,22 @@ public class WebSecurityConfigurer {
     @EnableWebSecurity
     public class AdminSecurity extends WebSecurityConfigurerAdapter {
         private final AuthenticationProvider authenticationProvider;
-
-        AdminSecurity(AuthenticationProvider authenticationProvider1) {
+        AdminSecurity(@Qualifier("adminAuthProvider") AuthenticationProvider authenticationProvider1) {
             this.authenticationProvider = authenticationProvider1;
         }
 
         @Override
         protected void configure(HttpSecurity http) throws Exception {
-            http.authorizeRequests().antMatchers("/admin", "/admin/**")
+            http.antMatcher("/admin/**")
+                    .authorizeRequests()
+                    .anyRequest()
                     .hasRole("ADMIN")
                     .and()
                     .authenticationProvider(authenticationProvider)
                     .headers().frameOptions().sameOrigin().and()
                     .formLogin()
                     .loginPage("/login/admin")
-                    .loginProcessingUrl("/admin")
+                    .loginProcessingUrl("/admin/check")
                     .and()
             .csrf().disable();
         }
@@ -78,13 +88,26 @@ public class WebSecurityConfigurer {
     @Order(3)
     @EnableWebSecurity
     public class ClientSecurity extends WebSecurityConfigurerAdapter {
+        private final AuthenticationProvider authenticationProvider;
+
+        public ClientSecurity(@Qualifier("clientAuthProvider") AuthenticationProvider authenticationProvider) {
+            this.authenticationProvider = authenticationProvider;
+        }
+
         @Override
         protected void configure(HttpSecurity http) throws Exception {
             http.antMatcher("/client/**")
-                    .authorizeRequests().anyRequest().authenticated().and()
+                    .authorizeRequests()
+                    .anyRequest()
+                    .hasRole("CLIENT")
+                    .and()
+                    .authenticationProvider(authenticationProvider)
                     .headers().frameOptions().sameOrigin().and()
-                    .formLogin();
-//                    .loginPage("/login/client");
+                    .formLogin()
+                    .loginPage("/login/client")
+                    .loginProcessingUrl("/client/check")
+                    .and()
+                    .csrf().disable();
         }
     }
 
