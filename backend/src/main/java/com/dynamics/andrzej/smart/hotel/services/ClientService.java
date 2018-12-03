@@ -75,6 +75,17 @@ public class ClientService {
         clientRepository.save(client);
     }
 
+    public void subtractDebt(Client client, double roomPrice) {
+        client.setDebt(client.getDebt() - roomPrice);
+        clientRepository.save(client);
+    }
+
+    public void pay(String email) {
+        final Client client = clientRepository.findByLoginEquals(email).orElseThrow(() -> new IllegalArgumentException("user not found"));
+        client.setDebt(0.0);
+        clientRepository.save(client);
+    }
+
     public void delete(Long id) {
         final Client client = clientRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Cannot load user!"));
         if (client.getDebt() > 0.0) {
@@ -83,9 +94,26 @@ public class ClientService {
         clientRepository.delete(client);
     }
 
+    public ClientWithReservations findByLogin(String email) {
+        final Client client = clientRepository.findByLoginEquals(email).orElseThrow(() -> new IllegalArgumentException("user not found"));
+        final List<Reservation> allByClientId = reservationRepository.findAllByClientId(client.getId());
+        return new ClientWithReservations(client, allByClientId);
+    }
+
+
     public ClientWithReservations findById(Long id) {
         final Client client = clientRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("user not found"));
         final List<Reservation> allByClientId = reservationRepository.findAllByClientId(client.getId());
         return new ClientWithReservations(client, allByClientId);
+    }
+
+    public Client update(Client client) {
+        final Client fromDb = clientRepository.findById(client.getId()).orElseThrow(() -> new IllegalArgumentException("not found"));
+        fromDb.setFirstName(client.getFirstName());
+        fromDb.setLastName(client.getLastName());
+        fromDb.setCity(client.getCity());
+        fromDb.setStreet(client.getStreet());
+        fromDb.setFlatNumber(client.getFlatNumber());
+        return clientRepository.save(fromDb);
     }
 }

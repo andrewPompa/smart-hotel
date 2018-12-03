@@ -33,7 +33,7 @@ public class ClientUserDetailsService implements UserDetailsService {
         return map(client);
     }
 
-    private UserDetails map(Client receptionist) {
+    private UserDetails map(Client client) {
         return new UserDetails() {
             @Override
             public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -42,12 +42,12 @@ public class ClientUserDetailsService implements UserDetailsService {
 
             @Override
             public String getPassword() {
-                return receptionist.getPassword();
+                return client.getPassword();
             }
 
             @Override
             public String getUsername() {
-                return receptionist.getLogin();
+                return client.getLogin();
             }
 
             @Override

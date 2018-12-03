@@ -4,7 +4,12 @@ import com.dynamics.andrzej.smart.hotel.entities.Client;
 import com.dynamics.andrzej.smart.hotel.models.ClientWithReservations;
 import com.dynamics.andrzej.smart.hotel.services.ClientService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+import sun.plugin.liveconnect.SecurityContextHelper;
 
 import java.util.List;
 
@@ -15,6 +20,14 @@ public class ClientsController {
 
     public ClientsController(ClientService clientService) {
         this.clientService = clientService;
+    }
+
+    @GetMapping("/client/pay")
+    public boolean pay() {
+        final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        final UserDetails client = (UserDetails) authentication.getPrincipal();
+        clientService.pay(client.getUsername());
+        return true;
     }
 
     @GetMapping("/admin/api/client/all")
@@ -37,5 +50,17 @@ public class ClientsController {
     @PostMapping("/register/client-form")
     public Client register(@RequestBody Client client) {
         return clientService.register(client);
+    }
+
+    @PostMapping("/client/api/update")
+    public Client update(@RequestBody Client client) {
+        return clientService.update(client);
+    }
+
+    @GetMapping("/client/api/info")
+    public ClientWithReservations getClientInfo() {
+        final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        final UserDetails client = (UserDetails) authentication.getPrincipal();
+        return clientService.findByLogin(client.getUsername());
     }
 }

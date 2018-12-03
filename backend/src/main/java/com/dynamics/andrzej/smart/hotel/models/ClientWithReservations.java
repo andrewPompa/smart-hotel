@@ -16,6 +16,10 @@ public class ClientWithReservations extends Client {
         this.setFirstName(client.getFirstName());
         this.setLastName(client.getLastName());
         this.setDebt(client.getDebt());
+        this.setLogin(client.getLogin());
+        this.setCity(client.getCity());
+        this.setStreet(client.getStreet());
+        this.setFlatNumber(client.getFlatNumber());
         this.reservations = reservations;
     }
 

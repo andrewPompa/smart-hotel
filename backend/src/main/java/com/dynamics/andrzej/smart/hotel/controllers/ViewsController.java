@@ -17,6 +17,21 @@ public class ViewsController {
         return "register_client";
     }
 
+    @RequestMapping("/client/info")
+    public String clientInfo() {
+        return "client_info";
+    }
+
+    @RequestMapping("/client/data")
+    public String clientData() {
+        return "client_data";
+    }
+
+    @RequestMapping("/client/search-room")
+    public String clientSearchRoom() {
+        return "client_room_search";
+    }
+
     @RequestMapping("/login/admin")
     public String loginAdmin() {
         return "login_admin";

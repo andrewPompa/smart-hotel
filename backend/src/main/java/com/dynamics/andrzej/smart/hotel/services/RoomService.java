@@ -102,6 +102,18 @@ public class RoomService {
             client = clientService.register(request.getEmail(), request.getFirstName(), request.getLastName(), pin);
             response = new ReservationResponse(true, pin);
         }
+        return reserveRoom(request, client, response);
+    }
+
+    public ReservationResponse reserveForClient(ReservationRequest request) {
+        Client client = clientService
+                .getClientByEmail(request.getEmail())
+                .orElseThrow(() -> new IllegalArgumentException("not found"));
+        ReservationResponse response = new ReservationResponse(false, null);
+        return reserveRoom(request, client, response);
+    }
+
+    private ReservationResponse reserveRoom(ReservationRequest request, Client client, ReservationResponse response) {
         Reservation reservation = new Reservation();
         reservation.setClient(client);
         List<Room> rooms = roomRepository.findByIdIn(request.getRoomIds());
