@@ -65,6 +65,6 @@ public class ReservationPriceCalculatorTest {
                         new Date(2018, 12, 2),
                         new Date(2018, 12, 20)
                 );
-        System.out.println(price);
+        assert price == 767.6;
     }
 }
