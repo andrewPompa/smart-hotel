@@ -120,7 +120,7 @@ public class RoomService {
         reservation.setRooms(rooms);
         reservation.setFromDay(new java.sql.Date(request.getFrom().getTime()));
         reservation.setToDay(new java.sql.Date(request.getTo().getTime()));
-        double price = reservationPriceCalculator.calculate(rooms, request.getFrom(), request.getTo());
+        double price = reservationPriceCalculator.calculateWithClientDiscount(client, rooms, request.getFrom(), request.getTo());
         reservation.setRoomPrice(price);
         //todo: get authenticated user, if its receptionist then set to reservation
         reservationRepository.save(reservation);

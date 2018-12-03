@@ -1,10 +1,9 @@
 package com.dynamics.andrzej.smart.hotel.services;
 
-import com.dynamics.andrzej.smart.hotel.entities.ChangedPricePeriod;
-import com.dynamics.andrzej.smart.hotel.entities.Room;
-import com.dynamics.andrzej.smart.hotel.entities.RoomType;
-import com.dynamics.andrzej.smart.hotel.entities.SeasonPrice;
+import com.dynamics.andrzej.smart.hotel.entities.*;
 import com.dynamics.andrzej.smart.hotel.respositories.ChangedPricePeriodRepository;
+import com.dynamics.andrzej.smart.hotel.respositories.ClientRepository;
+import com.dynamics.andrzej.smart.hotel.respositories.ReservationRepository;
 import com.dynamics.andrzej.smart.hotel.respositories.SeasonPriceRepository;
 import org.springframework.stereotype.Service;
 
@@ -16,12 +15,20 @@ import java.util.List;
 public class ReservationPriceCalculator {
     private final double priceForSingleRoom = 100;
     private final double factorForPremiumRoom = 0.4;
+    private final java.sql.Date discountThreshold;
     private final SeasonPriceRepository seasonPriceRepository;
     private final ChangedPricePeriodRepository changedPricePeriodRepository;
+    private final ReservationRepository reservationRepository;
 
-    public ReservationPriceCalculator(SeasonPriceRepository seasonPriceRepository, ChangedPricePeriodRepository changedPricePeriodRepository) {
+
+    public ReservationPriceCalculator(SeasonPriceRepository seasonPriceRepository, ChangedPricePeriodRepository changedPricePeriodRepository, ReservationRepository reservationRepository) {
         this.seasonPriceRepository = seasonPriceRepository;
         this.changedPricePeriodRepository = changedPricePeriodRepository;
+        this.reservationRepository = reservationRepository;
+
+        final Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.YEAR, -2);
+        discountThreshold = new java.sql.Date(calendar.getTimeInMillis());
     }
 
     public double calculate(List<Room> rooms, Date from, Date to) {
@@ -38,6 +45,18 @@ public class ReservationPriceCalculator {
             }
             return price + typeFactor + seasonPriceFactor + changedPricePeriodFactor;
         }).reduce((aDouble, bDouble) -> aDouble + bDouble).orElseThrow(() -> new IllegalArgumentException("Something went wrong"));
+    }
+
+    public double calculateWithClientDiscount(Client client, List<Room> rooms, Date from, Date to) {
+        final double basePrice = calculate(rooms, from, to);
+
+        final List<Reservation> allByClientId = reservationRepository.findAllByClientId(client.getId());
+        final long numOfReservationToDiscount = allByClientId.stream().filter(reservation -> reservation.getToDay().after(discountThreshold)).count();
+        double discount = numOfReservationToDiscount / 100.0;
+        if (numOfReservationToDiscount >= 10) {
+            discount = 0.1;
+        }
+        return basePrice * discount;
     }
 
     private double calculateSeasonPricesPeriodFactor(Date from, Date to) {
