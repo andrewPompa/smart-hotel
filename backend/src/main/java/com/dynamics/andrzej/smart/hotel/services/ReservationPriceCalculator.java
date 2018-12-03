@@ -56,7 +56,7 @@ public class ReservationPriceCalculator {
         if (numOfReservationToDiscount >= 10) {
             discount = 0.1;
         }
-        return basePrice * discount;
+        return basePrice + basePrice * discount;
     }
 
     private double calculateSeasonPricesPeriodFactor(Date from, Date to) {
