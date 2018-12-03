@@ -29,6 +29,33 @@ public class ClientService {
         return clientRepository.findByLoginEquals(email);
     }
 
+    public Client register(Client client) {
+        if (client.getLogin() == null || client.getLogin().isEmpty()) {
+            throw new IllegalArgumentException("login has to be set");
+        }
+        if (client.getPassword() == null || client.getPassword().isEmpty()) {
+            throw new IllegalArgumentException("password has to be set");
+        }
+        if (client.getFirstName() == null || client.getFirstName().isEmpty()) {
+            throw new IllegalArgumentException("firstname has to be set");
+        }
+        if (client.getLastName() == null || client.getLastName().isEmpty()) {
+            throw new IllegalArgumentException("lastname has to be set");
+        }
+        if (client.getCity() == null || client.getCity().isEmpty()) {
+            throw new IllegalArgumentException("city has to be set");
+        }
+        if (client.getStreet() == null || client.getStreet().isEmpty()) {
+            throw new IllegalArgumentException("street has to be set");
+        }
+        if (client.getFlatNumber() == null || client.getFlatNumber().isEmpty()) {
+            throw new IllegalArgumentException("flat number has to be set");
+        }
+        client.setPassword(passwordEncoder.encode(client.getPassword()));
+        client.setDebt(0.0);
+        return clientRepository.save(client);
+    }
+
     public Client register(String email, String firstName, String lastName, String password) {
         Client client = new Client();
         client.setFirstName(firstName);

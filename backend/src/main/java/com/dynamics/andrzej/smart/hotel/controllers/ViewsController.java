@@ -8,8 +8,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 public class ViewsController {
 
     @GetMapping("/login/client")
-    public String index() {
+    public String loginClient() {
         return "login_client";
+    }
+
+    @RequestMapping("/register/client")
+    public String registerClient() {
+        return "register_client";
     }
 
     @RequestMapping("/login/admin")

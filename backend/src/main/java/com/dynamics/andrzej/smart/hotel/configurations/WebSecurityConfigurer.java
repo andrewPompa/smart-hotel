@@ -117,7 +117,7 @@ public class WebSecurityConfigurer {
         @Override
         protected void configure(HttpSecurity http) throws Exception {
             http.authorizeRequests()
-                    .antMatchers("/login", "/login/client", "/login/admin", "/webjars/**", "js/main.js", "/h2-console**", "/h2-console/**")
+                    .antMatchers("/login", "/login/client", "/register/client", "/login/admin", "/webjars/**", "js/main.js", "/h2-console**", "/h2-console/**")
                     .permitAll().and()
                     .headers().frameOptions().sameOrigin().and()
                     .csrf().disable();

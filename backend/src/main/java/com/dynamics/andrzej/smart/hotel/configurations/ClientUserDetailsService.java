@@ -37,7 +37,7 @@ public class ClientUserDetailsService implements UserDetailsService {
         return new UserDetails() {
             @Override
             public Collection<? extends GrantedAuthority> getAuthorities() {
-                return Stream.of(new SimpleGrantedAuthority("ROLE_USER")).collect(Collectors.toList());
+                return Stream.of(new SimpleGrantedAuthority("ROLE_CLIENT")).collect(Collectors.toList());
             }
 
             @Override

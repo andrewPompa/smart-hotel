@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/admin/api/client")
 @Slf4j
 public class ClientsController {
     private final ClientService clientService;
@@ -18,20 +17,25 @@ public class ClientsController {
         this.clientService = clientService;
     }
 
-    @GetMapping("/all")
+    @GetMapping("/admin/api/client/all")
     public List<Client> getClients() {
         return clientService.findAll();
     }
 
-    @GetMapping("{id}")
+    @GetMapping("/admin/api/client/{id}")
     public ClientWithReservations getClient(@PathVariable Long id) {
         log.info("client: {}", id);
         return clientService.findById(id);
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/admin/api/client/{id}")
     public void delete(@PathVariable Long id) {
         log.info("info: {}", id);
         clientService.delete(id);
+    }
+
+    @PostMapping("/register/client-form")
+    public Client register(@RequestBody Client client) {
+        return clientService.register(client);
     }
 }
