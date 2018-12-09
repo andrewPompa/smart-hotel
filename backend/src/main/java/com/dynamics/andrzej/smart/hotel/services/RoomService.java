@@ -58,7 +58,9 @@ public class RoomService {
     }
 
     public List<Room> findAll() {
-        return roomRepository.findAll();
+        final List<Room> all = roomRepository.findAll();
+        all.forEach(room -> room.getReservations().forEach(reservation -> reservation.setRooms(Collections.emptyList())));
+        return all;
     }
 
     public List<RoomSearchResult> searchRooms(Date from, Date to, RoomType preferredType, int numOfPeoples) {

@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -96,15 +97,13 @@ public class ClientService {
 
     public ClientWithReservations findByLogin(String email) {
         final Client client = clientRepository.findByLoginEquals(email).orElseThrow(() -> new IllegalArgumentException("user not found"));
-        final List<Reservation> allByClientId = reservationRepository.findAllByClientId(client.getId());
-        return new ClientWithReservations(client, allByClientId);
+        return getClientWithReservations(client);
     }
 
 
     public ClientWithReservations findById(Long id) {
         final Client client = clientRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("user not found"));
-        final List<Reservation> allByClientId = reservationRepository.findAllByClientId(client.getId());
-        return new ClientWithReservations(client, allByClientId);
+        return getClientWithReservations(client);
     }
 
     public Client update(Client client) {
@@ -115,5 +114,11 @@ public class ClientService {
         fromDb.setStreet(client.getStreet());
         fromDb.setFlatNumber(client.getFlatNumber());
         return clientRepository.save(fromDb);
+    }
+
+    private ClientWithReservations getClientWithReservations(Client client) {
+        final List<Reservation> allByClientId = reservationRepository.findAllByClientId(client.getId());
+        allByClientId.forEach(reservation -> reservation.getRooms().forEach(room -> room.setReservations(Collections.emptyList())));
+        return new ClientWithReservations(client, allByClientId);
     }
 }

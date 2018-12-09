@@ -27,7 +27,6 @@ public class Room {
     @Column(nullable = false)
     private RoomType type;
 
-    @ManyToMany
-    @JoinColumn(name = "reservation")
+    @ManyToMany(mappedBy = "rooms")
     private List<Reservation> reservations;
 }

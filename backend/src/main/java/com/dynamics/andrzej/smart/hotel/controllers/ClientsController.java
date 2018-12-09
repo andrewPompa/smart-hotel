@@ -5,11 +5,9 @@ import com.dynamics.andrzej.smart.hotel.models.ClientWithReservations;
 import com.dynamics.andrzej.smart.hotel.services.ClientService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
-import sun.plugin.liveconnect.SecurityContextHelper;
 
 import java.util.List;
 

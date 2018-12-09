@@ -22,7 +22,7 @@ public class Reservation {
     @JoinColumn(name = "client", nullable = false)
     private Client client;
 
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinColumn(name = "room", nullable = false)
     private List<Room> rooms;
 

@@ -77,6 +77,7 @@ public class WebSecurityConfigurer {
                     .authenticationProvider(authenticationProvider)
                     .headers().frameOptions().sameOrigin().and()
                     .formLogin()
+                    .successForwardUrl("/admin/reservation")
                     .loginPage("/login/admin")
                     .loginProcessingUrl("/admin/check")
                     .and()

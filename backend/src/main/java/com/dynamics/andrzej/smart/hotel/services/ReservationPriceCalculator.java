@@ -5,6 +5,7 @@ import com.dynamics.andrzej.smart.hotel.respositories.ChangedPricePeriodReposito
 import com.dynamics.andrzej.smart.hotel.respositories.ClientRepository;
 import com.dynamics.andrzej.smart.hotel.respositories.ReservationRepository;
 import com.dynamics.andrzej.smart.hotel.respositories.SeasonPriceRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.Calendar;
@@ -12,6 +13,7 @@ import java.util.Date;
 import java.util.List;
 
 @Service
+@Slf4j
 public class ReservationPriceCalculator {
     private final double priceForSingleRoom = 100;
     private final double factorForPremiumRoom = 0.4;
@@ -33,7 +35,9 @@ public class ReservationPriceCalculator {
 
     public double calculate(List<Room> rooms, Date from, Date to) {
         double changePricePeriodFactor = calculateChangePricePeriodFactor(from, to);
+        log.info("change price factor: {}", changePricePeriodFactor);
         double seasonPricesPeriodFactor = calculateSeasonPricesPeriodFactor(from, to);
+        log.info("season price factor: {}", seasonPricesPeriodFactor);
 
         return rooms.stream().map(room -> {
             double price = priceForSingleRoom * room.getSize();
@@ -43,6 +47,7 @@ public class ReservationPriceCalculator {
             if (room.getType() == RoomType.PREMIUM) {
                 typeFactor = price * factorForPremiumRoom;
             }
+            log.info("price together: {}", (price + typeFactor + seasonPriceFactor + changedPricePeriodFactor));
             return price + typeFactor + seasonPriceFactor + changedPricePeriodFactor;
         }).reduce((aDouble, bDouble) -> aDouble + bDouble).orElseThrow(() -> new IllegalArgumentException("Something went wrong"));
     }

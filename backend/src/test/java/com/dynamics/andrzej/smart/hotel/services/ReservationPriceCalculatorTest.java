@@ -22,6 +22,9 @@ public class ReservationPriceCalculatorTest {
     public void testCalculate() {
         assert 1 == 1;
     }
+    /*
+    * wtorki 12:15 - 12:45
+    * */
 
     @Test
     public void testCalculateWithClientDiscount() {
