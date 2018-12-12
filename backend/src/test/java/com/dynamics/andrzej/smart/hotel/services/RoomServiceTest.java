@@ -33,7 +33,6 @@ public class RoomServiceTest {
     @Test
     public void addDeleteRoomTest(){
         final Room room123 = new Room();
-        Long roomId = new Long(1234);
         room123.setName("123");
         room123.setSize(2);
         room123.setType(RoomType.STANDARD);
@@ -52,8 +51,6 @@ public class RoomServiceTest {
         final List<Room> afterRoomDeletion= roomRepository.findAll();
         Assert.assertEquals(afterRoomDeletion.size(),initialSize );
     }
-
-
 
     @Test
     public void searchRoomTest() {
