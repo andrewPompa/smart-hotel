@@ -12,10 +12,7 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -31,6 +28,32 @@ public class RoomServiceTest {
         roomRepository = run.getBean(RoomRepository.class);
         reservationRepository = run.getBean(ReservationRepository.class);
     }
+
+
+    @Test
+    public void addDeleteRoomTest(){
+        final Room room123 = new Room();
+        Long roomId = new Long(1234);
+        room123.setName("123");
+        room123.setSize(2);
+        room123.setType(RoomType.STANDARD);
+        final List<Room> beforeRoomAdd = roomRepository.findAll();
+        int initialSize = beforeRoomAdd.size();
+        roomService.add(room123);
+        final List<Room> afterRoomAdd= roomRepository.findAll();
+        Assert.assertEquals(afterRoomAdd.size(),initialSize +1 );
+        long idOfAddedRoom = 0;
+        for (Room r : afterRoomAdd){
+            if(room123.getName().equals(r.getName())){
+                idOfAddedRoom = r.getId();
+            }
+        }
+        roomService.delete(idOfAddedRoom);
+        final List<Room> afterRoomDeletion= roomRepository.findAll();
+        Assert.assertEquals(afterRoomDeletion.size(),initialSize );
+    }
+
+
 
     @Test
     public void searchRoomTest() {
@@ -60,4 +83,5 @@ public class RoomServiceTest {
         final List<Room> withoutReservationBetween = roomRepository.findWithoutReservationBetween(from, to);
         Assert.assertEquals(withoutReservationBetween.size() + 2, all.size());
     }
+
 }
