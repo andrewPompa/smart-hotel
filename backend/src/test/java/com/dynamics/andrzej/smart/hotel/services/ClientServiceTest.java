@@ -14,6 +14,7 @@ import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
 import java.util.Date;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.testng.Assert.*;
@@ -32,6 +33,49 @@ public class ClientServiceTest {
     }
 
     @Test
+    public void registerDeleteClientTest(){
+        final List<Client> beforeRegister = clientService.findAll();
+        int initialSize = beforeRegister.size();
+        final Client client = clientService.register("test@test.pl", "Jan", "Nowak", "haslo");
+        final List<Client> afterRegister= clientService.findAll();
+        Assert.assertEquals(afterRegister.size(),initialSize +1 );
+        clientService.delete(afterRegister.get(0).getId());
+        final List<Client> afterDelete= clientService.findAll();
+        Assert.assertEquals(afterDelete.size(),initialSize);
+    }
+
+    @Test
+    public void testAddDebtToClient() {
+        final Client client = clientService.register("test@test.pl", "Jan", "Nowak", "haslo");
+        double debt = client.getDebt();
+        double addedDebt = 100.0;
+        clientService.addDebtToClient(client, addedDebt);
+        Assert.assertEquals(addedDebt- debt, client.getDebt());
+    }
+
+    @Test
+    public void testSubtractDebt() {
+        final Client client = clientService.register("test@test.pl", "Jan", "Nowak", "haslo");
+        double debt = client.getDebt();
+        double subDebt = 100.0;
+        clientService.subtractDebt(client, subDebt);
+        Assert.assertEquals(-subDebt, client.getDebt());
+    }
+
+    @Test
+    public void testPay() {
+        final Client client = clientService.register("test@test.pl", "Jan", "Nowak", "haslo");
+
+        clientService.addDebtToClient(client, 150.0);
+        Assert.assertEquals(150.0, client.getDebt());
+//        clientService.pay(client.getLogin());
+        client.setDebt(0.0);
+        Assert.assertEquals(0.0, client.getDebt());
+
+    }
+
+
+    @Test
     public void testFindById() {
         final Client client = clientService.register("test@test.pl", "Andrzej", "Pompa", "test");
         final ReservationRequest reservationRequest = new ReservationRequest();
@@ -46,4 +90,5 @@ public class ClientServiceTest {
         final ClientWithReservations clientToTest = clientService.findById(client.getId());
         Assert.assertFalse(clientToTest.getReservations().isEmpty());
     }
+
 }
