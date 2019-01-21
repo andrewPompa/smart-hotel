@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Recepcjonista - klienci</title>
+    <link rel="stylesheet" type="text/css" href="/webjars/bootstrap/4.1.3/css/bootstrap.min.css"/>
+    <script type="text/javascript" src="/webjars/jquery/3.3.1/jquery.min.js"></script>
+    <script src="/webjars/bootstrap/4.1.3/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="/js/utils.js"></script>
+    <script type="text/javascript" src="/js/admin_clients.js"></script>
+</head>
+<body>
+
+<nav class="navbar navbar-dark bg-dark navbar-expand-lg">
+    <a class="navbar-brand" href="/admin/room-search">Panel recepcjonisty</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarText" aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarText">
+        <ul class="navbar-nav mr-auto">
+            <li class="nav-item">
+                <a class="nav-link active" href="/admin/clients">Klienci</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link " href="/admin/room">Pokoje</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/admin/reservation">Rezerwacje</a>
+            </li>
+        </ul>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="row">
+        <div id="feedback" class="col-md-12"></div>
+    </div>
+    <table id="test" class="table table-dark">
+        <thead>
+        <tr>
+            <th scope="col">#</th>
+            <th scope="col">Imię</th>
+            <th scope="col">Nazwisko</th>
+            <th scope="col">Debet</th>
+            <th scope="col">Usuń</th>
+            <th scope="col">Zobacz rezerwacje</th>
+        </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+    <div class="row">
+        <div id="clientInfo" class="col-md-12">
+            <table id="clientData" class="table table-dark">
+                <thead>
+                <tr>
+                    <th scope="col">Od</th>
+                    <th scope="col">Do</th>
+                    <th scope="col">Pokoje</th>
+                    <th scope="col">Cena</th>
+                </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+</body>
+</html>
